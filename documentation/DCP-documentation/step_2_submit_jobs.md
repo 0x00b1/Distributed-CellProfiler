@@ -60,7 +60,7 @@ As of Distributed-CellProfiler 2.2.0, `run_batch_general.py` has been reformatte
 ### Required inputs
 
 * `step` is the step that you would like to make jobs for.
-Supported steps are `zproj`, `illum`, `qc`, `qc_persite`, `assaydev`, and`analysis`
+Supported steps are `zproj`, `illum`, `qc`, `qc_persite`, `assaydev`, `assaydev_persite`, and `analysis`
 * `identifier` is the project identifier (e.g. "cpg0000-jump-pilot" or "2024_11_07_Collaborator_Cell_Painting")
 * `batch` is the name of the data batch (e.g. "2020_11_04_CPJUMP1")
 * `platelist` is the list of plates to process.

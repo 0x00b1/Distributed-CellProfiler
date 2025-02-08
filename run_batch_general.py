@@ -26,7 +26,7 @@ class JobQueue():
 
 
 def run_batch_general(
-    step,  # (zproj, illum, qc, qc_persite, assaydev, or analysis)
+    step,  # (zproj, illum, qc, qc_persite, assaydev, assaydev_persite, or analysis)
     identifier="",  # (e.g. cpg0000-jump-pilot)
     batch="",  # (e.g. 2020_11_04_CPJUMP1)
     platelist=[],  # (e.g. ['Plate1','Plate2'])
@@ -427,6 +427,71 @@ def run_batch_general(
 
         print("AssayDev job submitted. Check your queue")
 
+    elif step == "assaydev_persite":
+        assaydevqueue = JobQueue(f"{identifier}_AssayDev")
+        if not outpath:
+            outpath = path_dict[path_style]["assaydevoutpath"]
+        if not usebatch:
+            if not pipeline:
+                pipeline = "assaydev.cppipe"
+            if not csvname:
+                csvname = "load_data_with_illum.csv"
+
+            for plate in platelist:
+                if all(len(ele) == 0 for ele in wells):
+                    for eachrow in rows:
+                        for eachcol in columns:
+                            for site in sites:
+                                templateMessage_ad = {
+                                    "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachrow}{int(eachcol):{well_format}},Metadata_Site={site}",
+                                    "pipeline": posixpath.join(pipelinepath, pipeline),
+                                    "output": outpath,
+                                    "input": inputpath,
+                                    "data_file": posixpath.join(datafilepath, plate, csvname),
+                                }
+                                assaydevqueue.scheduleBatch(templateMessage_ad)
+                else:
+                    for well in wells:
+                        for site in sites:
+                            templateMessage_ad = {
+                                "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachwell},Metadata_Site={site}",
+                                "pipeline": posixpath.join(pipelinepath, pipeline),
+                                "output": outpath,
+                                "input": inputpath,
+                                "data_file": posixpath.join(datafilepath, plate, csvname),
+                            }
+                            assaydevqueue.scheduleBatch(templateMessage_ad)
+        else:
+            if not batchfile:
+                batchfile = "Batch_data_assaydev.h5"
+            for plate in platelist:
+                if all(len(ele) == 0 for ele in wells):
+                    for eachrow in rows:
+                        for eachcol in columns:
+                            for site in sites:
+                                templateMessage_ad = {
+                                    "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachrow}{int(eachcol):{well_format}},Metadata_Site={site}",
+                                    "pipeline": posixpath.join(batchpath, batchfile),
+                                    "output": outpath,
+                                    "input": inputpath,
+                                    "data_file": posixpath.join(batchpath, batchfile),
+                                }
+                                assaydevqueue.scheduleBatch(templateMessage_ad)
+                else:
+                    for eachwell in wells:
+                        for site in sites:
+                            templateMessage_ad = {
+                                "Metadata": f"Metadata_Plate={plate},Metadata_Well={eachwell},Metadata_Site={site}",
+                                "pipeline": posixpath.join(batchpath, batchfile),
+                                "output": outpath,
+                                "input": inputpath,
+                                "data_file": posixpath.join(batchpath, batchfile),
+                            }
+                            assaydevqueue.scheduleBatch(templateMessage_ad)
+
+        print("AssayDev job submitted. Check your queue")
+
+
     elif step == "analysis":
         analysisqueue = JobQueue(f"{identifier}_Analysis")
         if not outputstructure:
@@ -512,7 +577,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "step",
-        help="Step to make jobs for. Supported steps are zproj, illum, qc, qc_persite, assaydev, analysis",
+        help="Step to make jobs for. Supported steps are zproj, illum, qc, qc_persite, assaydev, assaydev_persite, analysis",
     )
     parser.add_argument("identifier", help="Project identifier")
     parser.add_argument("batch", help="Name of batch")
